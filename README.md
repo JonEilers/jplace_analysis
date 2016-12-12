@@ -9,3 +9,9 @@ takes all the jplace files from a metagenomic sample analysis and returns intern
 
 ### outlaw_code
 one off code that should be avoided
+
+### Ideas
+separate the cogs based on functional class (what functional family the cog belongs too) 
+Check if inner placements are ambiguous or placed to specific level. as in, using ncbi tax id, what level is it identified at. 
+
+
