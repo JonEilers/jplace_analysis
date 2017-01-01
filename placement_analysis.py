@@ -82,13 +82,14 @@ def num_internal_placements(file):
         # [2]: the highest probability placement edge is the 3rd element in the placement information
 
     # check placement edge number against internal edge list
-        if placement_edge in internal_edge_list:
-            global internal_count
-            internal_count += 1
-        # check placement edge number against leaf edge list
-        elif placement_edge in leaf_edge_list:
-            global external_count
-            external_count += 1
+            if placement_edge in internal_edge_list:
+                global internal_count
+                internal_count += 1
+            # check placement edge number against leaf edge list
+            elif placement_edge in leaf_edge_list:
+                global external_count
+                external_count += 1
+    return internal_count, external_count
 
 def internal_vs_leaf():
     jplace_files = jplace_file_grabber()
