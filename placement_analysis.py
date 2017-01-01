@@ -16,6 +16,10 @@ internalList = []
 leafsWithPlacement = []
 internalWithPlacement = []
 
+totalEdgeCount = 0
+leafCount = 0
+internalCount = 0
+
 def jplace_file_grabber():
     jplace = glob.glob("*.jplace")
     return jplace
@@ -30,13 +34,11 @@ def tree_splitter(jplace):
 
 def edge_counter(split_tree):
     # initialize totalEdgeCount at -1 because the root is indicated by a {x} but we dont want to count that in the edgeCount variable
-    totalEdgeCount = -1
-    leafCount = 0
-    internalCount = 0
+    global totalEdgeCount, leafCount, internalCount
+    totalEdgeCount -= 1
     # initialize lists to place leaf and internal edge numbers
     leafEdges = []
     internalEdges = []
-
     branches = tree_splitter(split_tree)
     # i is integer index of each element in list
     # v is value (string) at each index
@@ -51,7 +53,7 @@ def edge_counter(split_tree):
             internal_edgeNum = int(v.split('{')[1].split('}')[0])
             internalCount += 1
             internalEdges.append(internal_edgeNum)
-    return internalEdges, internalCount, leafCount, leafEdges
+    return {"internalEdges":internalEdges, "internalCount":internalCount, "leafCount":leafCount, "leafEdges":leafEdges}
     # there are i pquery elements in the 'placements list--for loop iterates through each pquery--basically placements[i]
     # each pquery consists of a unicode list of placements (u'p') and short-read names (u'nm')
 
@@ -61,17 +63,16 @@ def number_of_placements(file):
     for i in placements:
     #  verify total number of placements in the file
         total_placements += 1
-
-            # multiplicity is number of reads placed at that edge
-        multiplicity = i.values()[1]
-        numReads = len(multiplicity)
-    return (numReads, total_placements, leafCount, internalCount)
+    return (total_placements)
 
 def num_internal_placements(file):
-    internal_edge_list = edge_counter(file)[internalEdges]
+    internal_edge_list = edge_counter(file)["internalEdges"]
+    leaf_edge_list = edge_counter(file)["leafEdges"]
     placements = file['placements']
     for i in placements:
-        placement_edge = i.values()[0][0][2]
+#        placement_edge = i.values()[0][0][2]
+        for edge in i["p"]:
+            placement_edge = edge[2] #this is a magic number, changes between pplacer runs. Need to add a function to determine index.
 
         # i.values() retrieves the values (p and nm) of the unicode list (u'p', u'nm')
         # indeces: [0][0][2]
@@ -81,23 +82,13 @@ def num_internal_placements(file):
         # [2]: the highest probability placement edge is the 3rd element in the placement information
 
     # check placement edge number against internal edge list
-    if placement_edge in internal_edge_list:
-        internal_count += 1
-        if placement_edge not in internalWithPlacement:
-            internalWithPlacement.append(placement_edge)
-        smallList = [placement_edge, numReads]
-        internalList.append(smallList)
-    # check placement edge number against leaf edge list
-    elif placement_edge in leafEdges:
-        external_count += 1
-        if placement_edge not in leafsWithPlacement:
-            leafsWithPlacement.append(placement_edge)
-        smallList = [placement_edge, numReads]
-        leafList.append(smallList)
-
-    internal_placement_count += internalSeqSum
-    leaf_placement_count += leafSeqSum
-    total_placement_count += total_placements
+        if placement_edge in internal_edge_list:
+            global internal_count
+            internal_count += 1
+        # check placement edge number against leaf edge list
+        elif placement_edge in leaf_edge_list:
+            global external_count
+            external_count += 1
 
 def internal_vs_leaf():
     jplace_files = jplace_file_grabber()
@@ -107,10 +98,12 @@ def internal_vs_leaf():
 
         tree_counts = edge_counter(jplace)
         placement_count = number_of_placements(jplace)
-    return placement_count, tree_counts
-
+        number_of_internal_placements = num_internal_placements(jplace)
+    return placement_count, "\n", \
+           number_of_internal_placements, "\n"
 
 
 
 if __name__ == "__main__":
-    internal_vs_leaf()
+    with open("jplace_data", "w") as output:
+        output.write(str(internal_vs_leaf()))
