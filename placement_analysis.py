@@ -1,16 +1,12 @@
 import json
 # import argparse
 import re
-# import os
 import glob
-
 # import pandas
 
 internal_count = 0
 external_count = 0
-
 total_placement_count = 0
-
 totalEdgeCount = 0
 leafCount = 0
 internalCount = 0
@@ -90,4 +86,6 @@ def internal_vs_leaf():
 
 if __name__ == "__main__":
     with open("jplace_data", "w") as output:
-        output.write(str(internal_vs_leaf()))
+        output.write("Total number of read placements " + str(internal_vs_leaf()[0]))
+        output.write("\n" + "Number of reads placed internally " + str(internal_vs_leaf()[1][0]))
+        output.write("\n" + "Number of reads placed on leafs " + str(internal_vs_leaf()[1][1]))
