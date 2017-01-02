@@ -20,8 +20,7 @@ def jplace_file_grabber():
 def tree_splitter(jplace):
     ##json parse--extract tree string
     tree = jplace["tree"]
-    branches = re.split('[, ( )]',
-                        tree)  ##splitting at ')' '(' and ',' eliminates all delimiters that are not curly braces--
+    branches = re.split('[, ( )]',tree)  ##splitting at ')' '(' and ',' eliminates all delimiters that are not curly braces--
     # leaves either empty elements ex: u'' or elements withedge numbers/labels/lengths in each element of the list
     return branches
 
@@ -63,8 +62,7 @@ def placement_location(file):
     leaf_edge_list = edge_counter(file)["leafEdges"]
     placements = file['placements']
     for i in placements:
-        placement_edge = i["p"][0][
-            2]  # 2 is a magic number, changes between pplacer runs. Need to add a function to determine index.
+        placement_edge = i["p"][0][2]  # 2 is a magic number, changes between pplacer runs. Need to add a function to determine index.
         if placement_edge in internal_edge_list:
             global internal_count
             internal_count += 1
@@ -86,6 +84,7 @@ def internal_vs_leaf():
 
 if __name__ == "__main__":
     with open("jplace_data", "w") as output:
-        output.write("Total number of read placements " + str(internal_vs_leaf()[0]))
-        output.write("\n" + "Number of reads placed internally " + str(internal_vs_leaf()[1][0]))
-        output.write("\n" + "Number of reads placed on leafs " + str(internal_vs_leaf()[1][1]))
+        placement_handle = internal_vs_leaf()
+        output.write("Total number of read placements " + str(placement_handle[0]))
+        output.write("\n" + "Number of reads placed internally " + str(placement_handle[1][0]))
+        output.write("\n" + "Number of reads placed on leafs " + str(placement_handle[1][1]))
