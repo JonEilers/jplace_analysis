@@ -93,10 +93,12 @@ def get_cog_name(file):
     cog_name = file_name.split('.')[0]  # name of gene is first part of file name
     return(cog_name)
 
-def get_cog_ff(cog_name, cog_metadata):
+def get_cog_ff(cog_name, cog_metadata): # I have very mixed feelings about panda right now.....
     cog_data = cog_metadata[cog_metadata['# COG'].isin([cog_name])]
     cog_ff = cog_data['func']
-    return cog_ff
+    cog_ff_list = list(cog_ff)
+    cf = cog_ff_list[0]
+    return str(cf)
 
 def placement_location(file):
     external_count = 0
