@@ -98,7 +98,9 @@ def get_cog_ff(cog_name, cog_metadata): # I have very mixed feelings about panda
     cog_data = cog_metadata[cog_metadata['# COG'].isin([cog_name])]
     cog_ff = cog_data['func']
     cog_ff_list = list(cog_ff)
-    cf = cog_ff_list[0][0]
+    cf = cog_ff_list[0]
+    if len(cf) > 2:
+        cf = cf[0]
     return str(cf)
 
 def placement_location(file):
