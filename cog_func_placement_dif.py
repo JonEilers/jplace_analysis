@@ -73,11 +73,13 @@ def get_cog_metadata(file):
 
 def get_cog_func_abv(file):
     func_dict = pd.read_table(file)
-    func_fam_abv = func_dict[1]
+    func_fam_abv = func_dict['# Code']
     return func_fam_abv
 
-def create_cog_abv_dict(list):
-    func_dict = {list:0 for i in list}
+def create_cog_abv_dict(file):
+    list = get_cog_func_abv(file)
+    func_dict = {i:0 for i in list}
+    print(func_dict)
     return func_dict
 
 def placement_location(file):
@@ -112,7 +114,7 @@ def output(dir, out_file):
         output.write("\n" + "Number of reads placed internally " + '\t'+ str(placement_handle[1][0]))
         output.write("\n" + "Number of reads placed on leafs " + "\t"+ str(placement_handle[1][1]))
     get_cog_metadata('cognames2003-2014.tab')
-    get_cog_func_abv('fun2003-2014.tab')
+    create_cog_abv_dict('fun2003-2014.tab')
     return output
 
 
