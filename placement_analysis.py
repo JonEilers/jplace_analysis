@@ -54,15 +54,21 @@ def number_of_placements(file):
     global total_placement_count
     placements = file['placements']
     total_placement_count += len(placements)
-    return (total_placement_count)
+    return total_placement_count
 
+def edge_indice(file):
+    fields = file["fields"]
+    for index, items in enumerate(fields):
+        if items == "edge_num":
+            return index
 
 def placement_location(file):
     internal_edge_list = edge_counter(file)["internalEdges"]
     leaf_edge_list = edge_counter(file)["leafEdges"]
     placements = file['placements']
+    edge_index = edge_indice(file)
     for i in placements:
-        placement_edge = i["p"][0][2]  # 2 is a magic number, changes between pplacer runs. Need to add a function to determine index.
+        placement_edge = i["p"][0][edge_index]  # 2 is a magic number, changes between pplacer runs. Need to add a function to determine index.
         if placement_edge in internal_edge_list:
             global internal_count
             internal_count += 1
@@ -85,6 +91,6 @@ def internal_vs_leaf():
 if __name__ == "__main__":
     with open("jplace_data", "w") as output:
         placement_handle = internal_vs_leaf()
-        output.write("Total number of read placements " + str(placement_handle[0]))
-        output.write("\n" + "Number of reads placed internally " + str(placement_handle[1][0]))
-        output.write("\n" + "Number of reads placed on leafs " + str(placement_handle[1][1]))
+        output.write("Total number of read placements " + '\t' + str(placement_handle[0]))
+        output.write("\n" + "Number of reads placed internally " + '\t'+ str(placement_handle[1][0]))
+        output.write("\n" + "Number of reads placed on leafs " + "\t"+ str(placement_handle[1][1]))
