@@ -80,10 +80,10 @@ def create_empty_pd(cog_func_abv_file):
     list = get_cog_func_abv(cog_func_abv_file)
     slength = len(list)
     empty_list = []
-    for i in range(0,slength):
+    for i in range(0,slength+1):
         empty_list.append(0)
     empty_dict = {"Internal":empty_list, "Leaf":empty_list, "Total":empty_list}
-    func_abv = pd.DataFrame(list )
+    func_abv = pd.DataFrame(list)
     empty_pd = pd.DataFrame(empty_dict)
     empty_df = pd.concat([func_abv,empty_pd], axis = 1)
     ivl_empty_df = empty_df.set_index('# Code')
@@ -96,12 +96,13 @@ def get_cog_name(file):
 
 def get_cog_ff(cog_name, cog_metadata): # I have very mixed feelings about panda right now.....
     cog_data = cog_metadata[cog_metadata['# COG'].isin([cog_name])]
-    cog_ff = cog_data['func']
-    cog_ff_list = list(cog_ff)
-    cf = cog_ff_list[0]
-    if len(cf) > 2:
-        cf = cf[0]
-    return str(cf)
+    if cog_data.empty:
+        cog_ff = 'S'
+    else:
+        cog_ff = list(cog_data['func'])[0]
+        if len(cog_ff) > 1:
+            cog_ff = cog_ff[0]
+    return cog_ff
 
 def placement_location(file):
     external_count = 0
