@@ -98,7 +98,7 @@ def get_cog_ff(cog_name, cog_metadata): # I have very mixed feelings about panda
     cog_data = cog_metadata[cog_metadata['# COG'].isin([cog_name])]
     cog_ff = cog_data['func']
     cog_ff_list = list(cog_ff)
-    cf = cog_ff_list[0]
+    cf = cog_ff_list[0][0]
     return str(cf)
 
 def placement_location(file):
@@ -126,17 +126,15 @@ def internal_vs_leaf(dir):
             jplace = json.load(json_data)
             cog_name = get_cog_name(file)
         cog_ff = get_cog_ff(cog_name, cog_metadata)
-        dataframe.loc[cog_ff,'Total'] += number_of_placements(jplace)
-        placement_int_vs_ext = placement_location(jplace)
-        return str(dataframe), placement_int_vs_ext, str(dataframe.loc[cog_ff])
+        dataframe.loc[cog_ff,'Total'] += number_of_placements(jplace) #total # of placements
+        dataframe.loc[cog_ff,'Internal'] += placement_location(jplace)[0] #internal placements
+        dataframe.loc[cog_ff,'Leaf'] += placement_location(jplace)[1]#  and leaf placements
+    return str(dataframe)
 
 def output(dir, out_file):
     with open(out_file, "w") as output:
         placement_handle = internal_vs_leaf(dir)
-        output.write(placement_handle[2])
-        output.write("Total number of read placements " + '\t' + str(placement_handle[0]))
-        output.write("\n" + "Number of reads placed internally " + '\t'+ str(placement_handle[1][0]))
-        output.write("\n" + "Number of reads placed on leafs " + "\t"+ str(placement_handle[1][1]))
+        output.write(placement_handle)
     return output
 
 
