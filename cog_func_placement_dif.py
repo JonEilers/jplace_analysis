@@ -1,11 +1,17 @@
 #!/usr/bin/python3.5
 
+'''
+Abreviations
+ff = functional family
+ivl = internal vs leaf
+
+'''
+
 import json
 import argparse
 import re
 import os
 import pandas as pd
-
 
 internal_count = 0
 external_count = 0
@@ -72,15 +78,21 @@ def get_cog_metadata(file):
     return cog_meta_df
 
 def get_cog_func_abv(file):
-    func_dict = pd.read_table(file)
-    func_fam_abv = func_dict['# Code']
+    func_pd = pd.read_table(file)
+    func_fam_abv = func_pd['# Code']
     return func_fam_abv
 
-def create_cog_abv_dict(file):
-    list = get_cog_func_abv(file)
-    func_dict = {i:0 for i in list}
-    print(func_dict)
-    return func_dict
+def create_empty_pd(cog_func_abv_file):
+    list = get_cog_func_abv(cog_func_abv_file)
+    slength = len(list['# Code'])
+    for i in range(slength):
+        empty_list = []
+        empty_list.append(0)
+    empty_dict = {"Internal":empty_list, "Leaf":empty_list, "Total":empty_list}
+    empty_pd = pd.DataFrame(empty_dict)
+    empty_df = pd.merge(list, empty_pd, how='outer', on = '# Code')
+    print(empty_df)
+
 
 def placement_location(file):
     internal_edge_list = edge_counter(file)["internalEdges"]
@@ -114,7 +126,7 @@ def output(dir, out_file):
         output.write("\n" + "Number of reads placed internally " + '\t'+ str(placement_handle[1][0]))
         output.write("\n" + "Number of reads placed on leafs " + "\t"+ str(placement_handle[1][1]))
     get_cog_metadata('cognames2003-2014.tab')
-    create_cog_abv_dict('fun2003-2014.tab')
+    create_empty_pd('fun2003-2014.tab')
     return output
 
 
