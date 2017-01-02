@@ -86,7 +86,8 @@ def create_empty_pd(cog_func_abv_file):
     func_abv = pd.DataFrame(list )
     empty_pd = pd.DataFrame(empty_dict)
     empty_df = pd.concat([func_abv,empty_pd], axis = 1)
-    return empty_df
+    ivl_empty_df = empty_df.set_index('# Code')
+    return ivl_empty_df
 
 def get_cog_name(file):
     file_name = os.path.basename(file)
@@ -118,16 +119,16 @@ def placement_location(file):
 
 def internal_vs_leaf(dir):
     cog_metadata = get_cog_metadata('cognames2003-2014.tab')
-    create_empty_pd('fun2003-2014.tab')
+    dataframe = create_empty_pd('fun2003-2014.tab')
     jplace_files = get_files(dir)
     for file in jplace_files:
         with open(file) as json_data:
             jplace = json.load(json_data)
-        placement_count_total = number_of_placements(jplace)
+            cog_name = get_cog_name(file)
+        cog_ff = get_cog_ff(cog_name, cog_metadata)
+        dataframe.loc[cog_ff,'Total'] += number_of_placements(jplace)
         placement_int_vs_ext = placement_location(jplace)
-        cog_name = get_cog_name(file)
-        cog_ff = str(get_cog_ff(cog_name, cog_metadata))
-        return placement_count_total, placement_int_vs_ext, cog_ff
+        return str(dataframe), placement_int_vs_ext, str(dataframe.loc[cog_ff])
 
 def output(dir, out_file):
     with open(out_file, "w") as output:
