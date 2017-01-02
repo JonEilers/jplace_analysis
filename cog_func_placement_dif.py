@@ -84,15 +84,15 @@ def get_cog_func_abv(file):
 
 def create_empty_pd(cog_func_abv_file):
     list = get_cog_func_abv(cog_func_abv_file)
-    slength = len(list['# Code'])
-    for i in range(slength):
-        empty_list = []
+    slength = len(list)
+    empty_list = []
+    for i in range(0,slength):
         empty_list.append(0)
     empty_dict = {"Internal":empty_list, "Leaf":empty_list, "Total":empty_list}
+    func_abv = pd.DataFrame(list )
     empty_pd = pd.DataFrame(empty_dict)
-    empty_df = pd.merge(list, empty_pd, how='outer', on = '# Code')
+    empty_df = pd.concat([func_abv,empty_pd], axis = 1)
     print(empty_df)
-
 
 def placement_location(file):
     internal_edge_list = edge_counter(file)["internalEdges"]
