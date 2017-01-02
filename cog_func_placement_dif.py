@@ -13,13 +13,6 @@ import re
 import os
 import pandas as pd
 
-internal_count = 0
-external_count = 0
-total_placement_count = 0
-totalEdgeCount = 0
-leafCount = 0
-internalCount = 0
-
 
 def get_files(root_directory, extension='.jplace'):
     filtered_files = []
@@ -39,8 +32,9 @@ def tree_splitter(jplace):
 
 
 def edge_counter(split_tree):
-    global totalEdgeCount, leafCount, internalCount
-    totalEdgeCount -= 1
+    internalCount = -1
+    totalEdgeCount = -1
+    leafCount = 0
     leafEdges = []
     internalEdges = []
     branches = tree_splitter(split_tree)
@@ -62,7 +56,7 @@ def edge_counter(split_tree):
 
 
 def number_of_placements(file):
-    global total_placement_count
+    total_placement_count = 0
     placements = file['placements']
     total_placement_count += len(placements)
     return total_placement_count
@@ -74,7 +68,7 @@ def edge_indice(file):
             return index
 
 def get_cog_metadata(file):
-    cog_meta_df = pd.read_table(file)
+    cog_meta_df = pd.read_table(file, index_col = False)
     return cog_meta_df
 
 def get_cog_func_abv(file):
@@ -92,9 +86,30 @@ def create_empty_pd(cog_func_abv_file):
     func_abv = pd.DataFrame(list )
     empty_pd = pd.DataFrame(empty_dict)
     empty_df = pd.concat([func_abv,empty_pd], axis = 1)
-    print(empty_df)
+    return empty_df
+
+def get_cog_name(file):
+    file_name = os.path.basename(file)
+    cog_name = file_name.split('.')[0]  # name of gene is first part of file name
+    return(cog_name)
+
+def get_cog_ff(cog_name, cog_metadata):
+    cog_ff = cog_metadata[cog_metadata['# COG'].isin([cog_name])]
+    return cog_ff
+
+
+
+'''
+    if cog_name in cog_metadata[]:
+        cog_ff = cog_metadata['cog_name',1]
+        return cog_ff
+    else:
+        raise IOError('COG %s not found' % cog_name)
+'''
 
 def placement_location(file):
+    external_count = 0
+    internal_count = 0
     internal_edge_list = edge_counter(file)["internalEdges"]
     leaf_edge_list = edge_counter(file)["leafEdges"]
     placements = file['placements']
@@ -102,31 +117,32 @@ def placement_location(file):
     for i in placements:
         placement_edge = i["p"][0][edge_index]
         if placement_edge in internal_edge_list:
-            global internal_count
             internal_count += 1
         elif placement_edge in leaf_edge_list:
-            global external_count
             external_count += 1
     return internal_count, external_count
 
 
 def internal_vs_leaf(dir):
+    cog_metadata = get_cog_metadata('cognames2003-2014.tab')
+    create_empty_pd('fun2003-2014.tab')
     jplace_files = get_files(dir)
     for file in jplace_files:
         with open(file) as json_data:
             jplace = json.load(json_data)
         placement_count_total = number_of_placements(jplace)
         placement_int_vs_ext = placement_location(jplace)
-    return placement_count_total, placement_int_vs_ext
+        cog_name = get_cog_name(file)
+        cog_ff = str(get_cog_ff(cog_name, cog_metadata))
+        return placement_count_total, placement_int_vs_ext, cog_ff
 
 def output(dir, out_file):
     with open(out_file, "w") as output:
         placement_handle = internal_vs_leaf(dir)
+        output.write(placement_handle[2])
         output.write("Total number of read placements " + '\t' + str(placement_handle[0]))
         output.write("\n" + "Number of reads placed internally " + '\t'+ str(placement_handle[1][0]))
         output.write("\n" + "Number of reads placed on leafs " + "\t"+ str(placement_handle[1][1]))
-    get_cog_metadata('cognames2003-2014.tab')
-    create_empty_pd('fun2003-2014.tab')
     return output
 
 
