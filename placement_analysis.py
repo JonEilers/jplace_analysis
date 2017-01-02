@@ -1,8 +1,9 @@
+#!/usr/bin/python3.5
+
 import json
-# import argparse
+import argparse
 import re
-import glob
-# import pandas
+import os
 
 internal_count = 0
 external_count = 0
@@ -12,13 +13,17 @@ leafCount = 0
 internalCount = 0
 
 
-def jplace_file_grabber():
-    jplace = glob.glob("*.jplace")
-    return jplace
+def get_files(root_directory, extension='.jplace'):
+    filtered_files = []
+    extension_length = len(extension)
+    for root, subdirList, files in os.walk(os.path.abspath(root_directory)):
+        for name in files:
+            if name[-extension_length:] == extension:
+                filtered_files.append(os.path.join(root, name))
+    return filtered_files
 
 
 def tree_splitter(jplace):
-    ##json parse--extract tree string
     tree = jplace["tree"]
     branches = re.split('[, ( )]',tree)  ##splitting at ')' '(' and ',' eliminates all delimiters that are not curly braces--
     # leaves either empty elements ex: u'' or elements withedge numbers/labels/lengths in each element of the list
@@ -26,10 +31,8 @@ def tree_splitter(jplace):
 
 
 def edge_counter(split_tree):
-    # initialize totalEdgeCount at -1 because the root is indicated by a {x} but we dont want to count that in the edgeCount variable
     global totalEdgeCount, leafCount, internalCount
     totalEdgeCount -= 1
-    # initialize lists to place leaf and internal edge numbers
     leafEdges = []
     internalEdges = []
     branches = tree_splitter(split_tree)
@@ -68,7 +71,7 @@ def placement_location(file):
     placements = file['placements']
     edge_index = edge_indice(file)
     for i in placements:
-        placement_edge = i["p"][0][edge_index]  # 2 is a magic number, changes between pplacer runs. Need to add a function to determine index.
+        placement_edge = i["p"][0][edge_index]
         if placement_edge in internal_edge_list:
             global internal_count
             internal_count += 1
@@ -78,8 +81,8 @@ def placement_location(file):
     return internal_count, external_count
 
 
-def internal_vs_leaf():
-    jplace_files = jplace_file_grabber()
+def internal_vs_leaf(dir):
+    jplace_files = get_files(dir)
     for file in jplace_files:
         with open(file) as json_data:
             jplace = json.load(json_data)
@@ -87,10 +90,20 @@ def internal_vs_leaf():
         placement_int_vs_ext = placement_location(jplace)
     return placement_count_total, placement_int_vs_ext
 
-
-if __name__ == "__main__":
-    with open("jplace_data", "w") as output:
-        placement_handle = internal_vs_leaf()
+def output(dir, out_file):
+    with open(out_file, "w") as output:
+        placement_handle = internal_vs_leaf(dir)
         output.write("Total number of read placements " + '\t' + str(placement_handle[0]))
         output.write("\n" + "Number of reads placed internally " + '\t'+ str(placement_handle[1][0]))
         output.write("\n" + "Number of reads placed on leafs " + "\t"+ str(placement_handle[1][1]))
+    return output
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Count the number of internal placements vs leaf placements on a phylogenetic tree. Takes .jplace files")
+    parser.add_argument('-directory', help = 'directory with .jplace files', required = True)
+    parser.add_argument('-out_file', help = 'output file (txt formart)', required = True)
+    args = parser.parse_args()
+
+    output(dir = args.directory, out_file=args.out_file)
+
