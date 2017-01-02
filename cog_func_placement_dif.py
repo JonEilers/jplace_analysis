@@ -94,18 +94,9 @@ def get_cog_name(file):
     return(cog_name)
 
 def get_cog_ff(cog_name, cog_metadata):
-    cog_ff = cog_metadata[cog_metadata['# COG'].isin([cog_name])]
+    cog_data = cog_metadata[cog_metadata['# COG'].isin([cog_name])]
+    cog_ff = cog_data['func']
     return cog_ff
-
-
-
-'''
-    if cog_name in cog_metadata[]:
-        cog_ff = cog_metadata['cog_name',1]
-        return cog_ff
-    else:
-        raise IOError('COG %s not found' % cog_name)
-'''
 
 def placement_location(file):
     external_count = 0
