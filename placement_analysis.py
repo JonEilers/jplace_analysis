@@ -4,6 +4,7 @@ import json
 import argparse
 import re
 import os
+import pandas as pd
 
 internal_count = 0
 external_count = 0
@@ -81,23 +82,17 @@ def placement_location(file):
     return internal_count, external_count
 
 
-def internal_vs_leaf(dir):
+def internal_vs_leaf(dir, out_file):
     jplace_files = get_files(dir)
     for file in jplace_files:
         with open(file) as json_data:
             jplace = json.load(json_data)
         placement_count_total = number_of_placements(jplace)
         placement_int_vs_ext = placement_location(jplace)
-    return placement_count_total, placement_int_vs_ext
-
-def output(dir, out_file):
-    with open(out_file, "w") as output:
-        placement_handle = internal_vs_leaf(dir)
-        output.write("Total number of read placements " + '\t' + str(placement_handle[0]))
-        output.write("\n" + "Number of reads placed internally " + '\t'+ str(placement_handle[1][0]))
-        output.write("\n" + "Number of reads placed on leafs " + "\t"+ str(placement_handle[1][1]))
+    ivl_dict = {'Leaf Count': external_count, 'Internal Count':internal_count, 'Total Number of Placements':total_placement_count}
+    ivl_series = pd.Series(ivl_dict)
+    output = ivl_series.to_csv(out_file)
     return output
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Count the number of internal placements vs leaf placements on a phylogenetic tree. Takes .jplace files")
@@ -105,5 +100,7 @@ if __name__ == "__main__":
     parser.add_argument('-out_file', help = 'output file (txt formart)', required = True)
     args = parser.parse_args()
 
-    output(dir = args.directory, out_file=args.out_file)
+    internal_vs_leaf(dir = args.directory, out_file=args.out_file)
+
+
 
