@@ -119,26 +119,30 @@ def placement_location(file):
             external_count += 1
     return internal_count, external_count
 
+def get_json_contents(file_name):
+    f = open(file_name)
+    json_data = None
+    try:
+        json_data = json.load(f)
+    except Exception as e:  # pragma nocover
+        print('json error with file %s - skipping\n%s' % (f.name, e.message))
+    finally:
+        f.close()
+    return json_data
 
-def internal_vs_leaf(dir):
+def internal_vs_leaf(dir, out_file):
     cog_metadata = get_cog_metadata('cognames2003-2014.tab')
     dataframe = create_empty_pd('fun2003-2014.tab')
     jplace_files = get_files(dir)
     for file in jplace_files:
-        with open(file) as json_data:
-            jplace = json.load(json_data)
-            cog_name = get_cog_name(file)
+        jplace = get_json_contents(file)
+        cog_name = get_cog_name(file)
         cog_ff = get_cog_ff(cog_name, cog_metadata)
         dataframe.loc[cog_ff,'Total'] += number_of_placements(jplace) #total # of placements
         dataframe.loc[cog_ff,'Internal'] += placement_location(jplace)[0] #internal placements
         dataframe.loc[cog_ff,'Leaf'] += placement_location(jplace)[1]#  and leaf placements
-    return str(dataframe)
+    return dataframe.to_csv(out_file)
 
-def output(dir, out_file):
-    with open(out_file, "w") as output:
-        placement_handle = internal_vs_leaf(dir)
-        output.write(placement_handle)
-    return output
 
 
 if __name__ == "__main__":
@@ -147,5 +151,5 @@ if __name__ == "__main__":
     parser.add_argument('-out_file', help = 'output file (txt formart)', required = True)
     args = parser.parse_args()
 
-    output(dir = args.directory, out_file=args.out_file)
+    internal_vs_leaf(dir = args.directory, out_file=args.out_file)
 
