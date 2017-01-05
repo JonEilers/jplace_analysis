@@ -5,6 +5,15 @@ Abreviations
 ff = functional family
 ivl = internal vs leaf
 
+
+To-do list
+- add function to count the number of cogs in each family
+	-then normalize the data. as in, find which cogs spike the most when they all have the same number
+- add function to determine which cogs have the most reads mapped to them
+- low priority - add function to select branches or subsections of a jplace phylogenetic tree
+- add function that accounts for what the sample depth was
+
+
 '''
 
 import json
