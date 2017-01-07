@@ -15,6 +15,14 @@ To-do list
 - High Priority
 	- func that takes cog family of interest and returns all the cogs and the number of reads mapped to them
 
+- optimizations
+	-a: add functional family names
+	-b: add options for selecting multiple files and appending the dataframes
+	-c: create classes for the various script functions that are related
+	-d: look for ways to optimize the script
+	-e: improve documentation/argparse help
+
+
 '''
 
 import json
