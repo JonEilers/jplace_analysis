@@ -5,14 +5,15 @@ Abreviations
 ff = functional family
 ivl = internal vs leaf
 
-
 To-do list
 - add function to count the number of cogs in each family
-	-then normalize the data. as in, find which cogs spike the most when they all have the same number
+	-then normalize the data. as in, find which cogs spike the most when they all have the same number?
 - add function to determine which cogs have the most reads mapped to them
 - low priority - add function to select branches or subsections of a jplace phylogenetic tree
 - add function that accounts for what the sample depth was
 
+- High Priority
+	- func that takes cog family of interest and returns all the cogs and the number of reads mapped to them
 
 '''
 
@@ -78,7 +79,15 @@ def edge_indice(file):
 
 def get_cog_metadata(file):
     cog_meta_df = pd.read_table(file, index_col = False)
-    return cog_meta_df
+    cog_ff = list(cog_meta_df['func'])
+    for i in range(0,len(cog_ff)):
+        if cog_ff[i] == '':
+            cog_ff[i] = 'S'
+        else:
+            if len(cog_ff[i]) > 1:
+                cog_ff[i] = cog_ff[i][0]
+    cog_ff = pd.Series(cog_ff, name = 'Functional Family COG Count')
+    return cog_meta_df, cog_ff.value_counts()
 
 def get_cog_func_abv(file):
     func_pd = pd.read_table(file)
@@ -141,15 +150,17 @@ def get_json_contents(file_name):
 
 def internal_vs_leaf(dir, out_file):
     cog_metadata = get_cog_metadata('cognames2003-2014.tab')
+    #cog_ff_counts = get_cog_metadata('cognames2003-2014.tab')[1]
     dataframe = create_empty_pd('fun2003-2014.tab')
     jplace_files = get_files(dir)
     for file in jplace_files:
         jplace = get_json_contents(file)
         cog_name = get_cog_name(file)
-        cog_ff = get_cog_ff(cog_name, cog_metadata)
+        cog_ff = get_cog_ff(cog_name, cog_metadata[0])
         dataframe.loc[cog_ff,'Total'] += number_of_placements(jplace) #total # of placements
         dataframe.loc[cog_ff,'Internal'] += placement_location(jplace)[0] #internal placements
         dataframe.loc[cog_ff,'Leaf'] += placement_location(jplace)[1]#  and leaf placements
+    dataframe = pd.concat([dataframe, cog_metadata[1]], axis = 1)
     return dataframe.to_csv(out_file)
 
 
@@ -161,4 +172,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     internal_vs_leaf(dir = args.directory, out_file=args.out_file)
+    print(get_cog_metadata('cognames2003-2014.tab')[1])
+
 
